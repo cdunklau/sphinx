@@ -295,6 +295,9 @@ class PyObject(ObjectDescription):
 
     def add_target_and_index(self, name_cls, sig, signode):
         # type: (unicode, unicode, addnodes.desc_signature) -> None
+        print('PyObject.add_target_and_index called with:', (name_cls, sig, signode))
+        print('    and has options:', self.options)
+        print('    and env.ref_context:', self.env.ref_context)
         modname = self.options.get(
             'module', self.env.ref_context.get('py:module'))
         fullname = (modname and modname + '.' or '') + name_cls[0]
@@ -437,9 +440,12 @@ class PyClassmember(PyObject):
         # type: (unicode, unicode) -> unicode
         name, cls = name_cls
         add_modules = self.env.config.add_module_names
+        print('PythonDomain.get_index_text: objtype:', self.objtype)
+        print('    name:', name)
         if self.objtype == 'method':
             try:
                 clsname, methname = name.rsplit('.', 1)
+                print('    for method: modname, clsname, methname:', (modname, clsname, methname))
             except ValueError:
                 if modname:
                     return _('%s() (in module %s)') % (name, modname)
@@ -478,6 +484,7 @@ class PyClassmember(PyObject):
         elif self.objtype == 'attribute':
             try:
                 clsname, attrname = name.rsplit('.', 1)
+                print('    for attribute: modname,clsname, attrname:', (modname, clsname, attrname))
             except ValueError:
                 if modname:
                     return _('%s (in module %s)') % (name, modname)
@@ -749,6 +756,7 @@ class PythonDomain(Domain):
     def merge_domaindata(self, docnames, otherdata):
         # type: (List[unicode], Dict) -> None
         # XXX check duplicates?
+        print('PythonDomain.merge_domaindata: otherdata["objects"]:', otherdata['objects'])
         for fullname, (fn, objtype) in otherdata['objects'].items():
             if fn in docnames:
                 self.data['objects'][fullname] = (fn, objtype)
@@ -880,9 +888,11 @@ class PythonDomain(Domain):
     def get_objects(self):
         # type: () -> Iterator[Tuple[unicode, unicode, unicode, unicode, unicode, int]]
         for modname, info in iteritems(self.data['modules']):
+            print('PythonDomain.get_objects first loop yielding', (modname, modname, 'module', info[0], 'module-' + modname, 0))
             yield (modname, modname, 'module', info[0], 'module-' + modname, 0)
         for refname, (docname, type) in iteritems(self.data['objects']):
             if type != 'module':  # modules are already handled
+                print('PythonDomain.get_objects second loop yielding', (refname, refname, type, docname, refname, 1))
                 yield (refname, refname, type, docname, refname, 1)
 
     def get_full_qualified_name(self, node):
