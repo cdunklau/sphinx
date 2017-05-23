@@ -296,10 +296,11 @@ class PyObject(ObjectDescription):
     def add_target_and_index(self, name_cls, sig, signode):
         # type: (unicode, unicode, addnodes.desc_signature) -> None
         print('PyObject.add_target_and_index called with:', (name_cls, sig, signode))
-        print('    and has options:', self.options)
+        print('    and we have options:', self.options)
         print('    and env.ref_context:', self.env.ref_context)
         modname = self.options.get(
             'module', self.env.ref_context.get('py:module'))
+        print('    and found modname:', modname)
         fullname = (modname and modname + '.' or '') + name_cls[0]
         # note target
         if fullname not in self.state.document.ids:
@@ -318,6 +319,7 @@ class PyObject(ObjectDescription):
             objects[fullname] = (self.env.docname, self.objtype)
 
         indextext = self.get_index_text(modname, name_cls)
+        print('    and made indextext:', repr(indextext))
         if indextext:
             self.indexnode['entries'].append(('single', indextext,
                                               fullname, '', None))
@@ -441,7 +443,9 @@ class PyClassmember(PyObject):
         name, cls = name_cls
         add_modules = self.env.config.add_module_names
         print('PythonDomain.get_index_text: objtype:', self.objtype)
+        print('    modname:', modname)
         print('    name:', name)
+        print('    add_modules:', add_modules)
         if self.objtype == 'method':
             try:
                 clsname, methname = name.rsplit('.', 1)
